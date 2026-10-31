@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quantum Particle in a 3D Box Visualizer ⚛</title>
+
+
+    <!-- ================================================= -->
+    <!-- GOOGLE FONTS -->
+    <!-- ================================================= -->
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ================================================= -->
+    <!-- MATHJAX -->
+    <!-- ================================================= -->
+
+    <script>
+        window.MathJax = {
+
+            tex: {
+
+                inlineMath: [
+                    ['\\(', '\\)']
+                ],
+
+                displayMath: [
+                    ['\\[', '\\]']
+                ]
+
+            },
+
+            svg: {
+
+                fontCache: 'global'
+
+            }
+
+        };
+    </script>
+
+
+    <script
+        async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+
+    <!-- ================================================= -->
+    <!-- PLOTLY -->
+    <!-- ================================================= -->
+
+    <script
+        src="https://cdn.plot.ly/plotly-2.35.2.min.js">
+    </script>
+
+
+    <!-- CSS -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================================= -->
+    <!-- BACKGROUND -->
+    <!-- ================================================= -->
+
+    <canvas id="particles-bg"></canvas>
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <header>
+        ⚛ Quantum Particle in a 3D Box Visualizer ⚛
+    </header>
+
+
+    <!-- ================================================= -->
+    <!-- INPUT PANEL -->
+    <!-- ================================================= -->
+
+    <div class="panel">
+
+
+        <div class="input-group">
+
+            <label>
+                Quantum Numbers
+                (n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub>):
+            </label>
+
+
+            <div class="triple-input">
+
+                <input
+                    type="number"
+                    id="nx"
+                    value="1"
+                    min="1"
+                    step="1"
+                >
+
+                <input
+                    type="number"
+                    id="ny"
+                    value="1"
+                    min="1"
+                    step="1"
+                >
+
+                <input
+                    type="number"
+                    id="nz"
+                    value="1"
+                    min="1"
+                    step="1"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Box Lengths
+                (L<sub>x</sub>, L<sub>y</sub>, L<sub>z</sub> in nm):
+            </label>
+
+
+            <div class="triple-input">
+
+                <input
+                    type="number"
+                    id="Lx"
+                    value="1"
+                    min="0.1"
+                    step="0.1"
+                >
+
+                <input
+                    type="number"
+                    id="Ly"
+                    value="1"
+                    min="0.1"
+                    step="0.1"
+                >
+
+                <input
+                    type="number"
+                    id="Lz"
+                    value="1"
+                    min="0.1"
+                    step="0.1"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Particle Mass:
+            </label>
+
+
+            <select
+                id="mass"
+            >
+
+                <option value="electron">
+                    Electron
+                </option>
+
+                <option value="proton">
+                    Proton
+                </option>
+
+                <option value="custom">
+                    Custom
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div
+            class="input-group"
+            id="custom-mass-container"
+        >
+
+            <label>
+                Custom Mass (kg):
+            </label>
+
+
+            <input
+                type="number"
+                id="customMass"
+                value="9.109e-31"
+                step="1e-30"
+            >
+
+        </div>
+
+
+        <button
+            class="calculate-btn"
+            id="calculateBtn"
+        >
+            🚀 Calculate
+        </button>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CALCULATION RESULTS -->
+    <!-- ================================================= -->
+
+    <div class="results-grid">
+
+        <!-- WAVEFUNCTION -->
+        <div class="result-card">
+
+            <div class="result-label">
+                3D Wavefunction ψ(x,y,z)
+            </div>
+
+
+            <div class="result-equation">
+
+                \[ 
+                \psi\left(
+                \frac{L_x}{2},
+                \frac{L_y}{2},
+                \frac{L_z}{2}
+                \right)
+                \]
+
+            </div>
+
+            <div class="equation-equals">
+                =
+            </div>
+
+            <div
+                id="wavefunction"
+                class="result-value"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <!-- PROBABILITY DENSITY -->
+        <div class="result-card">
+
+            <div class="result-label">
+                Probability Density |ψ(x,y,z)|²
+            </div>
+
+
+            <div class="result-equation">
+
+                \[ 
+                \left|
+                \psi\left(
+                \frac{L_x}{2},
+                \frac{L_y}{2},
+                \frac{L_z}{2}
+                \right)
+                \right|^2
+                \]
+
+            </div>
+
+            <div class="equation-equals">
+                =
+            </div>
+
+            <div
+                id="probability"
+                class="result-value"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <!-- ENERGY -->
+        <div class="result-card">
+
+            <div class="result-label">
+                Energy
+            </div>
+
+
+            <div class="result-equation energy-equation">
+
+                \[ 
+                \begin{aligned}
+                E_{n_x,n_y,n_z}
+                &=
+                \frac{\pi^2\hbar^2}{2m}
+                \left(
+                \frac{n_x^2}{L_x^2}
+                +\frac{n_y^2}{L_y^2}
+                +\frac{n_z^2}{L_z^2}
+                \right)
+                \end{aligned}
+                \]
+
+            </div>
+
+            <div class="equation-equals">
+                =
+            </div>
+
+            <div
+                id="energy"
+                class="result-value"
+            >
+                —
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- INTERACTIVE VISUALISATIONS -->
+    <!-- ================================================= -->
+
+    <h2>
+        Interactive Visualisations
+    </h2>
+
+
+    <div
+        id="visualisationContent"
+        class="visualisation-content"
+    >
+
+
+        <div class="panel visualisation-panel">
+
+
+            <div class="visualisation-controls">
+
+
+                <label>
+
+                    Grid resolution:
+
+                    <input
+                        id="gridN"
+                        type="number"
+                        value="25"
+                        min="10"
+                        max="50"
+                        step="1"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Plot type:
+
+                    <select id="plotMode">
+
+                        <option value="" selected disabled>
+                            Select visualisation
+                        </option>
+
+                        <option value="slices">
+                            2D slices
+                        </option>
+
+                        <option value="isosurface">
+                            3D isosurface
+                        </option>
+
+                        <option value="volume">
+                            3D volume
+                        </option>
+
+                    </select>
+
+                </label>
+
+            </div>
+
+
+
+            <div class="control-section">
+
+
+                <label>
+
+                    Slice axis:
+
+                    <select id="sliceAxis">
+
+                        <option value="z">
+                            z
+                        </option>
+
+                        <option value="y">
+                            y
+                        </option>
+
+                        <option value="x">
+                            x
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <input
+                    type="range"
+                    id="sliceSlider"
+                    min="0"
+                    max="100"
+                    value="50"
+                >
+
+
+                <div class="slider-value">
+
+                    Slice position:
+
+                    <span id="sliceValue">
+                        50%
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="plotError"
+                class="plot-error"
+            ></div>
+
+
+            <div
+                id="plotsContainer"
+                class="plots-container"
+                aria-live="polite"
+            ></div>
+
+
+        </div>
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- ENERGY LEVEL COMPARISON -->
+    <!-- ================================================= -->
+
+    <h2>
+        ⚡ Energy Level Comparison
+    </h2>
+
+
+    <div class="panel">
+
+
+        <div class="energy-controls-row">
+
+            <div class="formula energy-formula">
+                \[
+                E_{n_x,n_y,n_z}=\frac{\pi^2\hbar^2}{2m}\left(\frac{n_x^2}{L_x^2}+\frac{n_y^2}{L_y^2}+\frac{n_z^2}{L_z^2}\right)
+                \]
+            </div>
+
+            <button
+                id="energyCompareBtn"
+                class="calculate-btn energy-compare-btn"
+            >
+                ⚡ Compare Energy Levels
+            </button>
+
+        </div>
+
+
+        <div
+            id="energyTable"
+            class="energy-table-container"
+        ></div>
+
+
+        <div
+            id="energyPlot"
+            class="energy-plot"
+        ></div>
+
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- THEORY -->
+    <!-- ================================================= -->
+
+    <h2 class="section-heading">
+        Theory
+    </h2>
+
+    <section class="theory" aria-label="Quantum particle theory and equations">
+        <article class="theory-card">
+            <h3 class="theory-card-title">Energy Levels</h3>
+            <p class="theory-description">For a particle confined in a 3D box of dimensions \(L_x \times L_y \times L_z\), the allowed energy is:</p>
+            <div class="theory-equation energy-theory-equation">
+                \[
+                E_{n_x,n_y,n_z}=\frac{\pi^2\hbar^2}{2m}\left(\frac{n_x^2}{L_x^2}+\frac{n_y^2}{L_y^2}+\frac{n_z^2}{L_z^2}\right)
+                \]
+            </div>
+        </article>
+
+        <article class="theory-card">
+            <h3 class="theory-card-title">Normalized Wavefunction</h3>
+            <p class="theory-description">The stationary-state wavefunction inside the box is:</p>
+            <div class="theory-equation wavefunction-theory-equation">
+                \[
+                \psi_{n_x,n_y,n_z}(x,y,z)=\sqrt{\frac{8}{L_xL_yL_z}}\,\sin\left(\frac{n_x\pi x}{L_x}\right)\sin\left(\frac{n_y\pi y}{L_y}\right)\sin\left(\frac{n_z\pi z}{L_z}\right)
+                \]
+            </div>
+        </article>
+
+        <article class="theory-card">
+            <h3 class="theory-card-title">Time-Dependent Wavefunction</h3>
+            <p class="theory-description">The time evolution of a stationary energy state is represented by:</p>
+            <div class="theory-equation time-theory-equation">
+                \[
+                \psi(x,y,z,t)=\psi(x,y,z)e^{-iEt/\hbar}
+                \]
+            </div>
+        </article>
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ================================================= -->
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
